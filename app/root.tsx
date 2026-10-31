@@ -9,6 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import {useAuthStore} from "~/lib/api";
+import {useEffect} from "react";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -24,6 +26,12 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { init } = useAuthStore();
+
+  useEffect(() => {
+    init()
+  }, [init]);
+
   return (
     <html lang="en">
       <head>

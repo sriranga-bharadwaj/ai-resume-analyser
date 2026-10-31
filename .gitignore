@@ -1,7 +1,10 @@
 .DS_Store
-.env
 /node_modules/
 
 # React Router
 /.react-router/
 /build/
+
+.env
+server/node_modules/
+server/uploads/

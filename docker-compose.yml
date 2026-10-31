@@ -1,0 +1,67 @@
+x-server-env: &server-env
+  MONGO_URL: mongodb://mongo:27017/resumind
+  REDIS_URL: redis://redis:6379
+  UPLOAD_DIR: /data/uploads
+  JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+  COOKIE_SECURE: ${COOKIE_SECURE:-false}
+  AI_PROVIDER: ${AI_PROVIDER:-openai}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+  ANALYSES_PER_HOUR: ${ANALYSES_PER_HOUR:-10}
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+  api:
+    build: ./server
+    environment: *server-env
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: ./server
+    command: ["npm", "run", "start:worker"]
+    environment: *server-env
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  uploads:
+  mongo-data:
+  redis-data:
