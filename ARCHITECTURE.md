@@ -1,6 +1,6 @@
 # Architecture
 
-This project extends the [JS Mastery AI Resume Analyzer](https://github.com/adrianhajdin/ai-resume-analyzer) tutorial. The original app ran auth, storage, and AI calls in the browser through Puter.js. This version moves them to a backend.
+The backend handles auth, storage, and AI calls, and a background worker runs each analysis.
 
 ```
 Browser -> nginx (frontend container) -> Express API -> MongoDB
